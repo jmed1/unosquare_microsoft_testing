@@ -1,0 +1,16 @@
+{
+  "name": "webtest",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "nightwatch"
+  },
+  "author": "José. F. Medrano",
+  "license": "ISC",
+  "devDependencies": {
+    "geckodriver": "^1.20.0",
+    "nightwatch": "^1.4.3",
+    "selenium-server": "^3.141.59"
+  }
+}
