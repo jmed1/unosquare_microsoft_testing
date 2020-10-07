@@ -37,14 +37,18 @@ module.exports = {
         const inputSearchSelector = 'input#cli_shellHeaderSearchInput';                                               
         const textToBeSought = "Visual Studio";
         const stayInUSAButton = 'button#R1MarketRedirect-close';
-        const price1 = '#coreui-productplacement-30l7ywa_0 span[itemprop=price]'
+        const price1 =       'li#coreui-productplacement-30l7ywa_dg7gmgf0dst3 div#coreui-productplacement-30l7ywa_0 span[itemprop=price]'
+        const price_other2 = 'li#coreui-productplacement-30l7ywa_dg7gmgf0dst4 div#coreui-productplacement-30l7ywa_1 span[itemprop=price]'
+        const price_other3 = 'li#coreui-productplacement-30l7ywa_dg7gmgf0dst6 div#coreui-productplacement-30l7ywa_2 span[itemprop=price]'
+        
         const priceValue = 'content'
-        price_sum = 0;
+        price_saved = 0;
         price1_val2 = 0;
         price1_val3 = 0;
         const firstImage = '#coreui-productplacement-30l7ywa_dg7gmgf0dst3 a'
-        //const price1_second_page = 'div#ProductPrice_productPrice_PriceContainer.pi-price-text span';
-        const price1_second_page = '#ProductPrice_productPrice_PriceContainer > span:nth-child(1)';                          
+        const price1_second_page = 'div#ProductPrice_productPrice_PriceContainer.pi-price-text';
+        const attributePriceSecondPage = "aria-label"
+        //const price1_second_page = 'div#ProductPrice_productPrice_PriceContainer.pi-price-text span[aria-disabled=false]';
         //const price1_second_page = '/html/body/section/div[1]/div[1]/div[1]/div[2]/div[6]/div/div[1]/div/div/div[1]/span';                          
         const cancel_signmeup_div = 'div.c-glyph.glyph-cancel';        
         const price1_third_page = 'div.item-price > div > span.c-price > span[itemprop=price] > span[aria-hidden=true]';
@@ -53,7 +57,10 @@ module.exports = {
 
         const selectAmount_selector = "div.item-quantity > select";
         const select20_selector = "div.item-quantity > select option:nth-child(20)";
-        const finalPrice = "span[itemprop=price]"
+        //const finalPrice = "span[itemprop=price]"
+        //const finalPrice = "div.XsLPvCL_:nth-child(4) > div:nth-child(1) > span:nth-child(1) > span:nth-child(2) > strong:nth-child(1) > span:nth-child(1)"
+        const finalPrice = "div.XsLPvCL_:nth-child(4) > div:nth-child(1) > span:nth-child(1) > span:nth-child(2) > strong:nth-child(1) > span[itemprop=price]"
+        total = "";
 
 
         num_renglones = 0;
@@ -84,10 +91,6 @@ module.exports = {
 
         browser.elements('css selector','ul[data-m*=Windows10_cont] > li > a', function(result) {
                 
-            /*console.log("result stringify : "  + JSON.stringify(result))
-            console.log("VALUE[0][1] : " + JSON.stringify(result.value[0][1]))
-            console.log("VALUE[0][1] : " + JSON.stringify(result.value[0][2]))
-            console.log("VALUE[0][1] : " + JSON.stringify(result.value[0][3]))*/
             console.log("Printing all Elements in Windows 10 dropdown: ")
 
             result.value.forEach(function(value){
@@ -153,32 +156,50 @@ module.exports = {
         /*7. Search for Visual Studio */
         .setValue(inputSearchSelector, textToBeSought)
         .click(buttonSearchSelector)
-        .waitForElementVisible(stayInUSAButton)
+        .waitForElementVisible(stayInUSAButton,10000,false)
         .click(stayInUSAButton)
+        /*8. Print the price for the 3 first elements listed in Software result list*/
         /*9. Store the price of the first one*/
         .waitForElementVisible(price1)
         .getAttribute(price1, priceValue, (result)=>{
             console.log(result);
-            price_sum+= parseInt(result.value.slice(1),10);
-            console.log("sum = "+price_sum);
+            price_saved= parseInt(result.value.slice(1),10);
+            console.log("Price = "+price_saved);
+        })
+        .waitForElementVisible(price_other2)
+        .getAttribute(price_other2, priceValue, (result)=>{
+            console.log(result);
+            price_saved= parseInt(result.value.slice(1),10);
+            console.log("Price = "+price_saved);
+        })
+        .waitForElementVisible(price_other3)
+        .getAttribute(price_other3, priceValue, (result)=>{
+            console.log(result);
+            price_saved= parseInt(result.value.slice(1),10);
+            console.log("Price = "+price_saved);
         })
         /* 10. Click on the first one to go to the details page */
         .click(firstImage)
         /* 11.Once in the details page, validate both prices are the same */
         .waitForElementVisible(price1_second_page)
         //.getText("xpath",price1_second_page, result=>{
-        .getText("css selector",price1_second_page, result2=>{
-            price1_val2 = parseInt(result2.value.slice(1),10);
+        .getAttribute(price1_second_page, attributePriceSecondPage, (result2)=>{      
+        //.getText(price1_second_page, result2=>{
+            console.log("Price s2 = "+ JSON.stringify(result2));
+            price1_val2 = parseInt(result2.value.replace(/Current price \$/g,""),10);
+            price1_val2 = parseInt(price1_val2,10);
+            console.log("Price 2 = "+ price1_val2);
         })
-        //.assert.ok(price_sum === price1_val2, "Precios "+price_sum+" iguales")
+        //.assert.ok(price_saved === price1_val2, "Precios "+price_saved+" iguales")
         .perform(()=>{
-            if (price_sum === price1_val2) 
-            console.log("Precios "+price_sum +" iguales");
+            if (price_saved === price1_val2) 
+            console.log("Precios "+price_saved +" iguales");
         })
         /*12. Click Add to Cart*/
         .waitForElementVisible(buttonAddToCart)
         .click(buttonAddToCart)
-        .waitForElementVisible(cancel_signmeup_div)
+        .pause(5000)
+        .waitForElementVisible(cancel_signmeup_div,10000,false)
         .verify.visible(cancel_signmeup_div, "Sign me up pop up div present")
         .click(cancel_signmeup_div)
         .verify.not.visible(cancel_signmeup_div, "Sign me up pop up div is NOT present anymore.")
@@ -189,33 +210,52 @@ module.exports = {
         .waitForElementVisible(price1_third_page)
         .getText(price1_third_page, result3=>{
             price1_val3 = parseInt(result3.value.slice(1),10);
+            console.log("Price3 = "+price1_val3);
             if ( price1_val3 === price1_val2 ) 
-            console.log("Precios "+price_sum +" iguales");
+            console.log("Precios "+price_saved +" iguales");
         })
         /*14. On the # of items dropdown select 20 and validate the Total amount is Unit Price * 20*/
         .waitForElementVisible(selectAmount_selector)
         .click(selectAmount_selector)
         .waitForElementVisible(select20_selector)
         .click(select20_selector)
-        .waitForElementVisible(finalPrice)
-        .getText(finalPrice, resulta=>{
-            price1_val_final = parseInt(resulta.value.slice(1),10)
-            
-            if(price1_val_final === 20*price1_val3){
-                console.log("All 3 prices are the same")
-                console.log("Final price = " + price1_val_final)
-                verificar.equal(price1_val_final,(20*price1_val3))
-            }else{
-                console.log("Final price = " + price1_val_final)
-                verificar.equal(price1_val_final,(20*price1_val3),"NO SON IGUALES LOS 3.")
-            }
-            
+        .pause(5000)
+        .waitForElementVisible(finalPrice, 10000, false)
+
+        browser.execute(function (finalPrice) {
+            var innerTotal = 0;
+            //a = document.querySelector("div.XsLPvCL_:nth-child(4) > div:nth-child(1) > span:nth-child(1) > span:nth-child(2) > strong:nth-child(1) > span[itemprop=price]")
+            a = document.querySelector(finalPrice)
+               //.forEach(a => innerTotal += Number(a.innerText));
+               //.forEach(a =>{
+                //innerTotal += Number(a.innerText)
+               //});
+            return a.innerText;
+            //return innerTotal;
+          //}, [], function(res) {
+          }, [finalPrice], function(res) {
+            total = Number(JSON.stringify(res.value).replace(/,|\"|\$|}/gi,"").trim());
+            console.log("res -> "+ JSON.stringify(res))
+            console.log("TOTAL = "+total)
+            console.log("type of TOTAL = "+ typeof(total) )
         })
 
+        .perform(()=>{
+            console.log(total)
+            if (total === 20*price1_val3)
+            {
+                console.log("Total amount equals sum of items' price.")
+                console.log("Total Amount = " + total)
+                verificar.equal(total,(20*price1_val3))
+            }
+            else{
+                console.log("Final price = " + JSON.stringify(total))
+                verificar.equal(total,(20*price1_val3),"LA SUMA DE LOS ARTÍCULOS ES INCORRECTA.")
+            }
 
-
-
-    },
+        })
+    }
+    ,
 
 
     
