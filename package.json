@@ -12,5 +12,8 @@
     "geckodriver": "^1.20.0",
     "nightwatch": "^1.4.3",
     "selenium-server": "^3.141.59"
+  },
+  "dependencies": {
+    "nightwatch-custom-commands-assertions": "^1.1.1"
   }
 }
